@@ -1,64 +1,192 @@
-import { Button } from '@/components/ui/button';
+'use client';
 
-function WelcomeImage() {
-  return (
-    <svg
-      width="64"
-      height="64"
-      viewBox="0 0 64 64"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="text-fg0 mb-4 size-16"
-    >
-      <path
-        d="M15 24V40C15 40.7957 14.6839 41.5587 14.1213 42.1213C13.5587 42.6839 12.7956 43 12 43C11.2044 43 10.4413 42.6839 9.87868 42.1213C9.31607 41.5587 9 40.7957 9 40V24C9 23.2044 9.31607 22.4413 9.87868 21.8787C10.4413 21.3161 11.2044 21 12 21C12.7956 21 13.5587 21.3161 14.1213 21.8787C14.6839 22.4413 15 23.2044 15 24ZM22 5C21.2044 5 20.4413 5.31607 19.8787 5.87868C19.3161 6.44129 19 7.20435 19 8V56C19 56.7957 19.3161 57.5587 19.8787 58.1213C20.4413 58.6839 21.2044 59 22 59C22.7956 59 23.5587 58.6839 24.1213 58.1213C24.6839 57.5587 25 56.7957 25 56V8C25 7.20435 24.6839 6.44129 24.1213 5.87868C23.5587 5.31607 22.7956 5 22 5ZM32 13C31.2044 13 30.4413 13.3161 29.8787 13.8787C29.3161 14.4413 29 15.2044 29 16V48C29 48.7957 29.3161 49.5587 29.8787 50.1213C30.4413 50.6839 31.2044 51 32 51C32.7956 51 33.5587 50.6839 34.1213 50.1213C34.6839 49.5587 35 48.7957 35 48V16C35 15.2044 34.6839 14.4413 34.1213 13.8787C33.5587 13.3161 32.7956 13 32 13ZM42 21C41.2043 21 40.4413 21.3161 39.8787 21.8787C39.3161 22.4413 39 23.2044 39 24V40C39 40.7957 39.3161 41.5587 39.8787 42.1213C40.4413 42.6839 41.2043 43 42 43C42.7957 43 43.5587 42.6839 44.1213 42.1213C44.6839 41.5587 45 40.7957 45 40V24C45 23.2044 44.6839 22.4413 44.1213 21.8787C43.5587 21.3161 42.7957 21 42 21ZM52 17C51.2043 17 50.4413 17.3161 49.8787 17.8787C49.3161 18.4413 49 19.2044 49 20V44C49 44.7957 49.3161 45.5587 49.8787 46.1213C50.4413 46.6839 51.2043 47 52 47C52.7957 47 53.5587 46.6839 54.1213 46.1213C54.6839 45.5587 55 44.7957 55 44V20C55 19.2044 54.6839 18.4413 54.1213 17.8787C53.5587 17.3161 52.7957 17 52 17Z"
-        fill="currentColor"
-      />
-    </svg>
-  );
-}
+import React from 'react';
+import { Button } from '@/components/ui/button';
+import { Shield, Sparkles, HelpCircle, PhoneCall, AlertTriangle, RefreshCw, Radio } from 'lucide-react';
 
 interface WelcomeViewProps {
   startButtonText: string;
   onStartCall: () => void;
+  micError?: boolean;
 }
 
 export const WelcomeView = ({
   startButtonText,
   onStartCall,
+  micError = false,
   ref,
+  ...props
 }: React.ComponentProps<'div'> & WelcomeViewProps) => {
-  return (
-    <div ref={ref}>
-      <section className="bg-background flex flex-col items-center justify-center text-center">
-        <WelcomeImage />
+  if (micError) {
+    return (
+      <div 
+        ref={ref} 
+        className="w-full max-w-md mx-auto px-4 text-center animate-in fade-in zoom-in-95 duration-300"
+        {...props}
+      >
+        <div className="relative mb-6 mx-auto flex items-center justify-center size-20 rounded-full bg-destructive/10 border border-destructive/30 text-destructive shadow-inner">
+          <AlertTriangle className="size-10" />
+        </div>
 
-        <p className="text-foreground max-w-prose pt-1 leading-6 font-medium">
-          Chat live with your voice AI agent
+        <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Microphone Access Blocked</h2>
+        <p className="text-slate-600 mt-3 text-sm leading-relaxed">
+          The assistant cannot hear you because microphone access is blocked. Please enable it in your browser settings to continue.
         </p>
+
+        <div className="w-full bg-destructive/5 border border-destructive/20 rounded-2xl p-5 mt-6 text-left space-y-4 shadow-sm">
+          <h4 className="text-xs font-semibold text-destructive uppercase tracking-wider">How to Enable:</h4>
+          <ol className="text-xs text-slate-600 space-y-3 list-decimal list-inside leading-relaxed">
+            <li>Look at the address bar at the top of your browser window.</li>
+            <li>Click the <strong>lock</strong> or <strong>microphone icon</strong> next to the URL.</li>
+            <li>Change the <strong>Microphone</strong> setting to <strong>Allow</strong>.</li>
+            <li>Click the button below to reload the page.</li>
+          </ol>
+        </div>
 
         <Button
+          onClick={() => window.location.reload()}
           size="lg"
-          onClick={onStartCall}
-          className="mt-6 w-64 rounded-full font-mono text-xs font-bold tracking-wider uppercase"
+          variant="destructive"
+          className="mt-8 w-64 rounded-full font-semibold flex items-center justify-center gap-2 cursor-pointer shadow-lg"
         >
-          {startButtonText}
+          <RefreshCw className="size-4" />
+          <span>Reload Page</span>
         </Button>
-      </section>
+      </div>
+    );
+  }
 
-      <div className="fixed bottom-5 left-0 flex w-full items-center justify-center">
-        <p className="text-muted-foreground max-w-prose pt-1 text-xs leading-5 font-normal text-pretty md:text-sm">
-          Need help getting set up? Check out the{' '}
-          <a
-            target="_blank"
-            rel="noopener noreferrer"
-            href="https://docs.livekit.io/agents/start/voice-ai/"
-            className="underline"
+  return (
+    <div 
+      ref={ref} 
+      className="w-full max-w-6xl mx-auto px-2 md:px-4 py-4 flex flex-col items-center justify-center animate-in fade-in duration-500"
+      {...props}
+    >
+      {/* 2-Card Layout Format */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full items-stretch min-h-[500px]">
+        {/* Left Card: Assistant Avatar & Start Call */}
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 md:p-8 flex flex-col justify-between items-center text-center relative overflow-hidden">
+          
+          {/* Top Status */}
+          <div className="w-full flex items-center justify-center mb-4">
+            <span className="inline-flex items-center gap-2 text-xs font-semibold text-sky-700 bg-sky-50 px-3 py-1 rounded-full border border-sky-100">
+              <Sparkles className="size-3.5 text-amber-500" />
+              Citizen AI Voice Assistant
+            </span>
+          </div>
+
+          {/* Central Avatar with Glow Ring */}
+          <div className="relative my-4 flex items-center justify-center">
+            {/* Pulsing Concentric Outer Ring */}
+            <div className="absolute size-48 md:size-52 rounded-full border-2 border-amber-400/50 animate-ping duration-1000 opacity-40 pointer-events-none" />
+            <div className="absolute size-44 md:size-48 rounded-full border-4 border-amber-400 shadow-xl shadow-amber-500/20 pointer-events-none" />
+            
+            {/* Avatar Image Circle */}
+            <div className="relative size-36 md:size-40 rounded-full overflow-hidden border-4 border-white shadow-lg bg-sky-50">
+              <img 
+                src="/jan-sahay-avatar.png" 
+                alt="Citizen AI Voice Assistant" 
+                className="size-full object-cover" 
+                onError={(e) => {
+                  // Fallback if image fails to load
+                  (e.target as HTMLImageElement).src = '/sam-avatar.png';
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Title & Description */}
+          <div className="space-y-2 max-w-md">
+            <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
+              Ready to Connect...
+            </h2>
+            <p className="text-slate-500 text-xs md:text-sm leading-relaxed">
+              Ask about PM-Kisan, report cyber crimes, verify UPI links, or ask for basic savings guidance.
+            </p>
+          </div>
+
+          {/* Start Call Button */}
+          <Button
+            size="lg"
+            onClick={onStartCall}
+            className="mt-6 w-full max-w-xs rounded-full font-mono text-xs font-bold tracking-wider uppercase bg-amber-500 hover:bg-amber-600 text-slate-950 transition-all duration-300 shadow-lg shadow-amber-500/20 cursor-pointer py-6 flex items-center justify-center gap-2"
           >
-            Voice AI quickstart
-          </a>
-          .
-        </p>
+            <PhoneCall className="size-4" />
+            <span>{startButtonText || "Start Audio Session"}</span>
+          </Button>
+
+          {/* TRY SAYING Section */}
+          <div className="w-full mt-6 pt-4 border-t border-slate-100 text-left">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2 font-mono">
+              TRY SAYING
+            </span>
+            <div className="flex flex-wrap gap-2">
+              <button 
+                onClick={onStartCall}
+                className="inline-flex items-center gap-1.5 text-xs text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors px-3 py-1.5 rounded-full border border-slate-200/80 cursor-pointer"
+              >
+                <HelpCircle className="size-3.5 text-slate-400" />
+                <span>"How do I report UPI fraud?"</span>
+              </button>
+              <button 
+                onClick={onStartCall}
+                className="inline-flex items-center gap-1.5 text-xs text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors px-3 py-1.5 rounded-full border border-slate-200/80 cursor-pointer"
+              >
+                <HelpCircle className="size-3.5 text-slate-400" />
+                <span>"Tell me about PM-Kisan scheme"</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Card: Live Transcript Panel Preview */}
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex flex-col justify-between h-full min-h-[480px]">
+          {/* Transcript Header */}
+          <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+            <span className="text-xs font-bold text-slate-600 font-mono tracking-wider uppercase flex items-center gap-2">
+              LIVE TRANSCRIPT
+            </span>
+            <span className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-600 border border-emerald-200 font-mono font-bold text-[10px] px-2.5 py-0.5 rounded-full">
+              <Radio className="size-3 text-emerald-500 animate-pulse" />
+              READY
+            </span>
+          </div>
+
+          {/* Sample Transcript Bubbles preview */}
+          <div className="flex-1 overflow-y-auto py-6 space-y-4 flex flex-col justify-center">
+            {/* Agent Message Demo */}
+            <div className="space-y-1">
+              <span className="text-xs font-medium text-slate-400 ml-1">Citizen Assistant</span>
+              <div className="bg-slate-100 text-slate-800 rounded-2xl rounded-tl-sm px-4 py-3 text-sm max-w-[85%] font-normal shadow-2xs leading-relaxed">
+                Namaste! Welcome to Citizen AI Voice Assistant. Click <strong>Start Audio Session</strong> to speak directly to me.
+              </div>
+            </div>
+
+            {/* User Message Demo */}
+            <div className="space-y-1 flex flex-col items-end">
+              <span className="text-xs font-medium text-slate-400 mr-1">You</span>
+              <div className="bg-sky-600 text-white rounded-2xl rounded-tr-sm px-4 py-3 text-sm max-w-[85%] font-normal shadow-2xs leading-relaxed">
+                How do I report a suspicious UPI link?
+              </div>
+            </div>
+
+            {/* Agent Response Demo */}
+            <div className="space-y-1">
+              <span className="text-xs font-medium text-slate-400 ml-1">Citizen Assistant</span>
+              <div className="bg-slate-100 text-slate-800 rounded-2xl rounded-tl-sm px-4 py-3 text-sm max-w-[85%] font-normal shadow-2xs leading-relaxed">
+                You can immediately report cyber fraud on the national cyber crime portal 1930. I can guide you step by step.
+              </div>
+            </div>
+          </div>
+
+          {/* Card Footer notice */}
+          <div className="pt-3 border-t border-slate-100 text-center">
+            <p className="text-xs text-slate-400 flex items-center justify-center gap-1.5">
+              <Shield className="size-3.5 text-slate-400" />
+              End-to-end encrypted audio stream
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
