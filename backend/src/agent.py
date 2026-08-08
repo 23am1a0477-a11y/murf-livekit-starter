@@ -1,4 +1,5 @@
 import logging
+import asyncio
 
 from dotenv import load_dotenv
 from livekit import rtc
@@ -12,6 +13,7 @@ from livekit.agents import (
     inference,
     tokenize,
     room_io,
+    UserInputTranscribedEvent,
 )
 from livekit.plugins import murf, silero, google, deepgram, noise_cancellation
 from livekit.plugins.turn_detector.multilingual import MultilingualModel
@@ -20,9 +22,21 @@ logger = logging.getLogger("agent")
 
 load_dotenv(".env.local")
 
+import os
+import importlib.util
+
 # Change this prompt to change what your voice agent does.
 # See README.md for example prompts (customer support, language tutor, receptionist).
-SYSTEM_PROMPT = """You are a friendly and efficient customer support agent for a tech company. Help users with account issues, billing questions, and product troubleshooting. Be concise, empathetic, and solution-oriented. If you don't know something, say so honestly and offer to escalate. Your responses are concise and without complex formatting, emojis, or symbols."""
+prompt_path = os.path.join(
+    os.path.dirname(__file__), "agent_starter_python.egg-info", "prompt.py"
+)
+if os.path.exists(prompt_path):
+    spec = importlib.util.spec_from_file_location("prompt", prompt_path)
+    prompt_module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(prompt_module)
+    SYSTEM_PROMPT = getattr(prompt_module, "SYSTEM_PROMPT", "")
+else:
+    SYSTEM_PROMPT = """You are a friendly and efficient customer support agent for a tech company. Help users with account issues, billing questions, and product troubleshooting. Be concise, empathetic, and solution-oriented. If you don't know something, say so honestly and offer to escalate. Your responses are concise and without complex formatting, emojis, or symbols."""
 
 
 class Assistant(Agent):
@@ -69,15 +83,35 @@ async def my_agent(ctx: JobContext):
     session = AgentSession(
         # Speech-to-text (STT) is your agent's ears, turning the user's speech into text that the LLM can understand
         # See all available models at https://docs.livekit.io/agents/models/stt/
-        stt=deepgram.STT(model="nova-3"),
+        stt=deepgram.STT(model="nova-3", language="multi"),
         # A Large Language Model (LLM) is your agent's brain, processing user input and generating a response
         # See all available models at https://docs.livekit.io/agents/models/llm/
         llm=google.LLM(
-                model="gemini-3.5-flash-lite",
-            ),
+            model=os.getenv("GEMINI_MODEL", "gemini-3.6-flash"),
+        ),
         # Text-to-speech (TTS) is your agent's voice, turning the LLM's text into speech that the user can hear
         # See all available models as well as voice selections at https://docs.livekit.io/agents/models/tts/
-       
+        tts=murf.TTS(
+                voice="Anisha", 
+                style="Conversation",
+                tokenizer=tokenize.basic.SentenceTokenizer(min_sentence_len=2),
+                text_pacing=True
+            ),
+            turn_detection=MultilingualModel(),
+            vad=ctx.proc.userdata["vad"],
+            preemptive_generation=True,
+    )
+
+    # @session.on("conversation_item_added")
+    # def on_conversation_item_added(event):
+    #     item = event.item
+    #     if hasattr(item, "text_content") and item.text_content:
+    #         text = item.text_content.strip()
+    #         if text:
+    #             logger.info(f"Broadcasting conversation item [{item.role}]: {text}")
+    #             asyncio.create_task(
+    #                 ctx.room.local_participant.send_text(text, topic="lk.chat")
+    #             )
 
     # To use a realtime model instead of a voice pipeline, use the following session setup instead.
     # (Note: This is for the OpenAI Realtime API. For other providers, see https://docs.livekit.io/agents/models/realtime/))
